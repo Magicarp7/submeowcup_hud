@@ -110,6 +110,12 @@
       cursor: pointer;
     }
 
+.swap-button {
+  margin-bottom: 18px;
+  background: #ffcf5a;
+  color: #111820;
+}
+
     .save-button {
       margin-top: 20px;
       font-size: 16px;
@@ -167,6 +173,7 @@
     </div>
   </div>
 
+<button class="swap-button" onclick="swapSides()">Поменять стороны местами</button>
   <div class="teams">
     <div class="team">
       <h2>Левая сторона</h2>
@@ -417,6 +424,41 @@
         get("status").className = "status danger";
       }
     }
+
+function swapInputValues(leftId, rightId) {
+  var leftValue = get(leftId).value;
+  var rightValue = get(rightId).value;
+
+  get(leftId).value = rightValue;
+  get(rightId).value = leftValue;
+}
+
+async function swapSides() {
+  if (!auth.currentUser) {
+    get("status").textContent = "Сначала войди";
+    get("status").className = "status danger";
+    return;
+  }
+
+  swapInputValues("leftTeamName", "rightTeamName");
+
+  for (var i = 0; i < 5; i++) {
+    swapInputValues("left_" + i + "_name", "right_" + i + "_name");
+    swapInputValues("left_" + i + "_agent", "right_" + i + "_agent");
+
+    updatePreview("left", i);
+    updatePreview("right", i);
+  }
+
+  await saveData();
+
+  get("status").textContent = "Стороны поменяны";
+  get("status").className = "status";
+
+  setTimeout(function () {
+    get("status").textContent = "";
+  }, 1500);
+}
 
     async function login() {
       var email = get("email").value;
