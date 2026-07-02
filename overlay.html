@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+
+  <style>
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      width: 1920px;
+      height: 1080px;
+      overflow: hidden;
+      background: transparent;
+      font-family: Arial, sans-serif;
+      color: white;
+    }
+
+    .hud-column {
+      position: absolute;
+      bottom: 10px;
+      width: 292px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.6));
+    }
+
+    .hud-column.left {
+      left: 18px;
+      transform: scale(1.12);
+      transform-origin: left bottom;
+    }
+
+    .hud-column.right {
+      right: 18px;
+      transform: scale(1.12);
+      transform-origin: right bottom;
+    }
+
+    .team-title {
+      width: 292px;
+      height: 34px;
+      background: rgba(9, 14, 20, 0.86);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 17px;
+      font-weight: 900;
+      letter-spacing: 1px;
+      box-sizing: border-box;
+    }
+
+    .hud-column.left .team-title {
+      border-left: 4px solid #30f0c8;
+      clip-path: polygon(0 0, 96% 0, 100% 100%, 0 100%);
+    }
+
+    .hud-column.right .team-title {
+      border-right: 4px solid #ff536b;
+      clip-path: polygon(4% 0, 100% 0, 100% 100%, 0 100%);
+    }
+
+    .side {
+      width: 292px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .player-card {
+      width: 292px;
+      height: 58px;
+      background: rgba(14, 20, 27, 0.86);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      box-sizing: border-box;
+    }
+
+    .hud-column.left .player-card {
+      padding-left: 10px;
+      padding-right: 18px;
+      border-left: 4px solid #30f0c8;
+      clip-path: polygon(0 0, 96% 0, 100% 100%, 0 100%);
+    }
+
+    .hud-column.right .player-card {
+      padding-left: 18px;
+      padding-right: 10px;
+      border-right: 4px solid #ff536b;
+      clip-path: polygon(4% 0, 100% 0, 100% 100%, 0 100%);
+      flex-direction: row-reverse;
+    }
+
+    .agent-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 6px;
+      background: linear-gradient(135deg, rgba(48, 240, 200, 0.35), rgba(255, 83, 107, 0.32));
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 19px;
+      font-weight: 900;
+      flex: 0 0 auto;
+      overflow: hidden;
+    }
+
+    .agent-icon img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .player-text {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .hud-column.left .player-text {
+      margin-left: 10px;
+      text-align: left;
+    }
+
+    .hud-column.right .player-text {
+      margin-right: 10px;
+      text-align: right;
+    }
+
+    .player-name {
+      font-size: 16px;
+      font-weight: 900;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      line-height: 18px;
+    }
+
+    .agent-name {
+      margin-top: 3px;
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.62);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="hud-column left">
+    <div id="leftTitle" class="team-title">LEFT</div>
+    <div id="leftSide" class="side"></div>
+  </div>
+
+  <div class="hud-column right">
+    <div id="rightTitle" class="team-title">RIGHT</div>
+    <div id="rightSide" class="side"></div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-database-compat.js"></script>
+  <script src="firebase-config.js"></script>
+
+  <script>
+    firebase.initializeApp(window.firebaseConfig);
+
+    var db = firebase.database();
+    var hudRef = db.ref(window.HUD_PATH || "hud");
+
+    var agentLetters = {
+      "Astra": "A",
+      "Breach": "B",
+      "Brimstone": "B",
+      "Chamber": "C",
+      "Clove": "C",
+      "Cypher": "C",
+      "Deadlock": "D",
+      "Fade": "F",
+      "Gekko": "G",
+      "Harbor": "H",
+      "Iso": "I",
+      "Jett": "J",
+      "KAY/O": "K",
+      "Killjoy": "K",
+      "Neon": "N",
+      "Omen": "O",
+      "Phoenix": "P",
+      "Raze": "R",
+      "Reyna": "R",
+      "Sage": "S",
+      "Skye": "S",
+      "Sova": "S",
+      "Viper": "V",
+      "Vyse": "V",
+      "Yoru": "Y"
+    };
+
+    function agentLetter(agent) {
+      if (!agent || agent === "?") {
+        return "?";
+      }
+
+      return agentLetters[agent] || String(agent).slice(0, 1).toUpperCase();
+    }
+
+    function createPlayerCard(player) {
+      var card = document.createElement("div");
+      card.className = "player-card";
+
+      var icon = document.createElement("div");
+      icon.className = "agent-icon";
+
+      if (player.agentIcon) {
+        var img = document.createElement("img");
+        img.src = player.agentIcon;
+        icon.appendChild(img);
+      } else {
+        icon.textContent = agentLetter(player.agent);
+      }
+
+      var text = document.createElement("div");
+      text.className = "player-text";
+
+      var name = document.createElement("div");
+      name.className = "player-name";
+      name.textContent = player.name || "Player";
+
+      var agent = document.createElement("div");
+      agent.className = "agent-name";
+      agent.textContent = player.agent && player.agent !== "?" ? player.agent : "agent unknown";
+
+      text.append(name, agent);
+      card.append(icon, text);
+
+      return card;
+    }
+
+    function renderSide(id, players) {
+      var root = document.getElementById(id);
+      root.innerHTML = "";
+
+      for (var i = 0; i < 5; i++) {
+        root.appendChild(createPlayerCard(players[i] || {
+          name: "Player " + (i + 1),
+          agent: "?",
+          agentIcon: ""
+        }));
+      }
+    }
+
+    function renderHud(data) {
+      data = data || {
+        leftTeam: {
+          name: "LEFT",
+          players: []
+        },
+        rightTeam: {
+          name: "RIGHT",
+          players: []
+        }
+      };
+
+      if (!data.leftTeam) {
+        data.leftTeam = {
+          name: "LEFT",
+          players: []
+        };
+      }
+
+      if (!data.rightTeam) {
+        data.rightTeam = {
+          name: "RIGHT",
+          players: []
+        };
+      }
+
+      document.getElementById("leftTitle").textContent = data.leftTeam.name || "LEFT";
+      document.getElementById("rightTitle").textContent = data.rightTeam.name || "RIGHT";
+
+      renderSide("leftSide", data.leftTeam.players || []);
+      renderSide("rightSide", data.rightTeam.players || []);
+    }
+
+    hudRef.on("value", function (snapshot) {
+      renderHud(snapshot.val());
+    });
+  </script>
+</body>
+</html>

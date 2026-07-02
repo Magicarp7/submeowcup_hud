@@ -1,0 +1,458 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+
+  <style>
+    body {
+      margin: 0;
+      padding: 24px;
+      background: #101820;
+      color: white;
+      font-family: Arial, sans-serif;
+    }
+
+    h1 {
+      margin-top: 0;
+      margin-bottom: 18px;
+    }
+
+    .login-box {
+      display: flex;
+      gap: 12px;
+      align-items: end;
+      margin-bottom: 22px;
+      padding: 14px;
+      background: #14202c;
+      border: 1px solid #2b3b4b;
+      border-radius: 10px;
+      width: fit-content;
+    }
+
+    .top {
+      display: flex;
+      gap: 18px;
+      margin-bottom: 22px;
+      flex-wrap: wrap;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    label {
+      font-size: 13px;
+      opacity: 0.75;
+    }
+
+    input {
+      width: 220px;
+      padding: 9px;
+      border: 1px solid #34495e;
+      border-radius: 6px;
+      background: #172331;
+      color: white;
+      font-size: 15px;
+    }
+
+    .teams {
+      display: flex;
+      gap: 28px;
+      align-items: flex-start;
+    }
+
+    .team {
+      width: 650px;
+      padding: 16px;
+      background: #14202c;
+      border: 1px solid #2b3b4b;
+      border-radius: 10px;
+    }
+
+    .team h2 {
+      margin-top: 0;
+    }
+
+    .player-row {
+      display: grid;
+      grid-template-columns: 32px 240px 230px 52px;
+      gap: 10px;
+      align-items: end;
+      margin-bottom: 12px;
+    }
+
+    .num {
+      opacity: 0.5;
+      padding-bottom: 10px;
+    }
+
+    .agent-preview {
+      width: 42px;
+      height: 42px;
+      border-radius: 7px;
+      background: #0c131a;
+      border: 1px solid #34495e;
+      object-fit: cover;
+      display: block;
+      visibility: hidden;
+    }
+
+    button {
+      padding: 11px 18px;
+      border: none;
+      border-radius: 8px;
+      background: #30f0c8;
+      color: #071015;
+      font-size: 15px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .save-button {
+      margin-top: 20px;
+      font-size: 16px;
+    }
+
+    .hint {
+      margin-top: 14px;
+      color: #a8bac8;
+      font-size: 14px;
+    }
+
+    .status {
+      margin-left: 14px;
+      color: #30f0c8;
+      font-weight: 900;
+    }
+
+    .danger {
+      color: #ff6b7a;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Редактор HUD</h1>
+
+  <datalist id="agentsList"></datalist>
+
+  <div class="login-box">
+    <div class="field">
+      <label>Email редактора</label>
+      <input id="email" type="email">
+    </div>
+
+    <div class="field">
+      <label>Пароль</label>
+      <input id="password" type="password">
+    </div>
+
+    <button onclick="login()">Войти</button>
+    <button onclick="logout()">Выйти</button>
+
+    <span id="loginStatus" class="status">Не вошёл</span>
+  </div>
+
+  <div class="top">
+    <div class="field">
+      <label>Левая команда</label>
+      <input id="leftTeamName">
+    </div>
+
+    <div class="field">
+      <label>Правая команда</label>
+      <input id="rightTeamName">
+    </div>
+  </div>
+
+  <div class="teams">
+    <div class="team">
+      <h2>Левая сторона</h2>
+      <div id="leftRows"></div>
+    </div>
+
+    <div class="team">
+      <h2>Правая сторона</h2>
+      <div id="rightRows"></div>
+    </div>
+  </div>
+
+  <button class="save-button" onclick="saveData()">Сохранить HUD</button>
+  <span id="status" class="status"></span>
+
+  <div class="hint">
+    В поле агент начни писать имя агента. Например Raze, Omen, Jett. После выбора картинка подставится сама.
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-database-compat.js"></script>
+  <script src="firebase-config.js"></script>
+
+  <script>
+    firebase.initializeApp(window.firebaseConfig);
+
+    var auth = firebase.auth();
+    var db = firebase.database();
+    var hudRef = db.ref(window.HUD_PATH || "hud");
+
+    var currentData = null;
+    var agents = [];
+
+    function get(id) {
+      return document.getElementById(id);
+    }
+
+    function defaultData() {
+      return {
+        leftTeam: {
+          name: "LEFT",
+          players: []
+        },
+        rightTeam: {
+          name: "RIGHT",
+          players: []
+        }
+      };
+    }
+
+    function findAgent(name) {
+      var value = String(name || "").trim().toLowerCase();
+
+      if (!value || value === "?") {
+        return null;
+      }
+
+      for (var i = 0; i < agents.length; i++) {
+        if (agents[i].name.toLowerCase() === value) {
+          return agents[i];
+        }
+      }
+
+      return null;
+    }
+
+    function getPlayer(teamKey, index) {
+      if (!currentData || !currentData[teamKey] || !currentData[teamKey].players) {
+        return {};
+      }
+
+      return currentData[teamKey].players[index] || {};
+    }
+
+    function setValue(id, value, fallback) {
+      if (value === undefined || value === null || value === "") {
+        get(id).value = fallback;
+      } else {
+        get(id).value = value;
+      }
+    }
+
+    function updatePreview(prefix, index) {
+      var agentName = get(prefix + "_" + index + "_agent").value;
+      var img = get(prefix + "_" + index + "_preview");
+      var agent = findAgent(agentName);
+
+      if (agent && agent.icon) {
+        img.src = agent.icon;
+        img.style.visibility = "visible";
+      } else {
+        img.removeAttribute("src");
+        img.style.visibility = "hidden";
+      }
+    }
+
+    function createRows(rootId, prefix) {
+      var root = get(rootId);
+      root.innerHTML = "";
+
+      for (var i = 0; i < 5; i++) {
+        var row = document.createElement("div");
+        row.className = "player-row";
+
+        row.innerHTML =
+          '<div class="num">' + (i + 1) + '</div>' +
+          '<div class="field">' +
+            '<label>Ник</label>' +
+            '<input id="' + prefix + '_' + i + '_name">' +
+          '</div>' +
+          '<div class="field">' +
+            '<label>Агент</label>' +
+            '<input id="' + prefix + '_' + i + '_agent" list="agentsList" placeholder="?">' +
+          '</div>' +
+          '<img id="' + prefix + '_' + i + '_preview" class="agent-preview">';
+
+        root.appendChild(row);
+      }
+    }
+
+    function fillPlayer(prefix, teamKey, index) {
+      var player = getPlayer(teamKey, index);
+
+      setValue(prefix + "_" + index + "_name", player.name, "");
+      setValue(prefix + "_" + index + "_agent", player.agent, "?");
+
+      var input = get(prefix + "_" + index + "_agent");
+
+      input.addEventListener("input", function () {
+        updatePreview(prefix, index);
+      });
+
+      updatePreview(prefix, index);
+
+      if (player.agentIcon) {
+        get(prefix + "_" + index + "_preview").src = player.agentIcon;
+        get(prefix + "_" + index + "_preview").style.visibility = "visible";
+      }
+    }
+
+    function fillTeam(prefix, teamKey) {
+      for (var i = 0; i < 5; i++) {
+        fillPlayer(prefix, teamKey, i);
+      }
+    }
+
+    function readPlayer(prefix, index) {
+      var agentName = get(prefix + "_" + index + "_agent").value || "?";
+      var agent = findAgent(agentName);
+
+      return {
+        name: get(prefix + "_" + index + "_name").value || "Player " + (index + 1),
+        agent: agent ? agent.name : agentName,
+        agentIcon: agent ? agent.icon : ""
+      };
+    }
+
+    function readTeam(prefix) {
+      var players = [];
+
+      for (var i = 0; i < 5; i++) {
+        players.push(readPlayer(prefix, i));
+      }
+
+      return players;
+    }
+
+    async function loadAgents() {
+      try {
+        var response = await fetch("https://valorant-api.com/v1/agents?language=ru-RU&isPlayableCharacter=true");
+        var result = await response.json();
+
+        agents = result.data.map(function (item) {
+          return {
+            name: item.displayName,
+            uuid: item.uuid,
+            icon: item.displayIcon
+          };
+        }).sort(function (a, b) {
+          return a.name.localeCompare(b.name);
+        });
+      } catch (error) {
+        agents = [];
+      }
+
+      var list = get("agentsList");
+      list.innerHTML = "";
+
+      for (var i = 0; i < agents.length; i++) {
+        var option = document.createElement("option");
+        option.value = agents[i].name;
+        list.appendChild(option);
+      }
+    }
+
+    function renderEditor(data) {
+      currentData = data || defaultData();
+
+      if (!currentData.leftTeam) {
+        currentData.leftTeam = defaultData().leftTeam;
+      }
+
+      if (!currentData.rightTeam) {
+        currentData.rightTeam = defaultData().rightTeam;
+      }
+
+      setValue("leftTeamName", currentData.leftTeam.name, "LEFT");
+      setValue("rightTeamName", currentData.rightTeam.name, "RIGHT");
+
+      createRows("leftRows", "left");
+      createRows("rightRows", "right");
+
+      fillTeam("left", "leftTeam");
+      fillTeam("right", "rightTeam");
+    }
+
+    async function saveData() {
+      if (!auth.currentUser) {
+        get("status").textContent = "Сначала войди";
+        get("status").className = "status danger";
+        return;
+      }
+
+      var data = {
+        leftTeam: {
+          name: get("leftTeamName").value || "LEFT",
+          players: readTeam("left")
+        },
+        rightTeam: {
+          name: get("rightTeamName").value || "RIGHT",
+          players: readTeam("right")
+        }
+      };
+
+      try {
+        await hudRef.set(data);
+
+        currentData = data;
+        get("status").textContent = "Сохранено";
+        get("status").className = "status";
+
+        setTimeout(function () {
+          get("status").textContent = "";
+        }, 1500);
+      } catch (error) {
+        get("status").textContent = "Ошибка сохранения";
+        get("status").className = "status danger";
+      }
+    }
+
+    async function login() {
+      var email = get("email").value;
+      var password = get("password").value;
+
+      try {
+        await auth.signInWithEmailAndPassword(email, password);
+      } catch (error) {
+        get("loginStatus").textContent = "Ошибка входа";
+        get("loginStatus").className = "status danger";
+      }
+    }
+
+    async function logout() {
+      await auth.signOut();
+    }
+
+    auth.onAuthStateChanged(function (user) {
+      if (user) {
+        get("loginStatus").textContent = "Вошёл";
+        get("loginStatus").className = "status";
+      } else {
+        get("loginStatus").textContent = "Не вошёл";
+        get("loginStatus").className = "status danger";
+      }
+    });
+
+    async function main() {
+      await loadAgents();
+
+      hudRef.on("value", function (snapshot) {
+        renderEditor(snapshot.val() || defaultData());
+      });
+    }
+
+    main();
+  </script>
+</body>
+</html>
