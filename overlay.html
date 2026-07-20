@@ -281,6 +281,7 @@
 
     function getDefaultData() {
       return {
+        showMaps: true,
         leftTeam: {
           name: "LEFT",
           logo: "",
@@ -355,17 +356,26 @@
     }
 
     function renderMaps(data) {
-      var root = document.getElementById("mapStrip");
-      root.innerHTML = "";
+      function renderMaps(data) {
+  var root = document.getElementById("mapStrip");
 
-      var defaultMaps = getDefaultData().maps;
-      var maps = data.maps || defaultMaps;
+  if (data && data.showMaps === false) {
+    root.innerHTML = "";
+    root.style.display = "none";
+    return;
+  }
 
-      for (var i = 0; i < 3; i++) {
-        var map = maps[i] || defaultMaps[i];
-        root.appendChild(createMapCard(map, data));
-      }
-    }
+  root.style.display = "flex";
+  root.innerHTML = "";
+
+  var defaultMaps = getDefaultData().maps;
+  var maps = data.maps || defaultMaps;
+
+  for (var i = 0; i < 3; i++) {
+    var map = maps[i] || defaultMaps[i];
+    root.appendChild(createMapCard(map, data));
+  }
+}
 
     function createPlayerCard(player) {
       var card = document.createElement("div");
