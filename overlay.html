@@ -17,44 +17,44 @@
     }
 
     .map-strip {
-  position: absolute;
-  left: 0;
-  top: 0;
-  height: 32px;
-  display: flex;
-  z-index: 9999;
-  filter: drop-shadow(0 3px 7px rgba(0, 0, 0, 0.75));
-}
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 32px;
+      display: flex;
+      z-index: 9999;
+      filter: drop-shadow(0 3px 7px rgba(0, 0, 0, 0.75));
+    }
 
     .map-card {
-  position: relative;
-  width: 225px;
-  height: 32px;
-  margin-right: 2px;
-  background: rgba(9, 14, 20, 0.88);
-  border-right: 1px solid rgba(255, 255, 255, 0.16);
-  clip-path: polygon(0 0, 94% 0, 100% 100%, 0 100%);
-  display: flex;
-  align-items: center;
-  padding-left: 8px;
-  padding-right: 28px;
-  box-sizing: border-box;
-  overflow: hidden;
-}
+      position: relative;
+      width: 225px;
+      height: 32px;
+      margin-right: 2px;
+      background: rgba(9, 14, 20, 0.88);
+      border-right: 1px solid rgba(255, 255, 255, 0.16);
+      clip-path: polygon(0 0, 94% 0, 100% 100%, 0 100%);
+      display: flex;
+      align-items: center;
+      padding-left: 8px;
+      padding-right: 28px;
+      box-sizing: border-box;
+      overflow: hidden;
+    }
 
     .map-label {
-      font-size: 13px;
+      font-size: 10px;
       font-weight: 900;
       color: rgba(255, 255, 255, 0.78);
-      margin-right: 5px;
+      margin-right: 4px;
       white-space: nowrap;
     }
 
     .map-name {
-      font-size: 15px;
+      font-size: 11px;
       font-weight: 900;
       color: white;
-      letter-spacing: 0.4px;
+      letter-spacing: 0.3px;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -62,23 +62,23 @@
 
     .map-logo {
       position: absolute;
-      right: 10px;
-      width: 24px;
-      height: 24px;
+      right: 7px;
+      width: 18px;
+      height: 18px;
       object-fit: contain;
     }
 
     .map-logo-fallback {
       position: absolute;
-      right: 10px;
-      width: 24px;
-      height: 24px;
+      right: 7px;
+      width: 18px;
+      height: 18px;
       border-radius: 4px;
       background: rgba(255, 255, 255, 0.12);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 11px;
+      font-size: 9px;
       font-weight: 900;
     }
 
@@ -271,14 +271,6 @@
       "Yoru": "Y"
     };
 
-    function agentLetter(agent) {
-      if (!agent || agent === "?") {
-        return "?";
-      }
-
-      return agentLetters[agent] || String(agent).slice(0, 1).toUpperCase();
-    }
-
     function getDefaultData() {
       return {
         showMaps: true,
@@ -310,6 +302,14 @@
           }
         ]
       };
+    }
+
+    function agentLetter(agent) {
+      if (!agent || agent === "?") {
+        return "?";
+      }
+
+      return agentLetters[agent] || String(agent).slice(0, 1).toUpperCase();
     }
 
     function getTeamByPicker(data, picker) {
@@ -356,26 +356,25 @@
     }
 
     function renderMaps(data) {
-      function renderMaps(data) {
-  var root = document.getElementById("mapStrip");
+      var root = document.getElementById("mapStrip");
 
-  if (data && data.showMaps === false) {
-    root.innerHTML = "";
-    root.style.display = "none";
-    return;
-  }
+      if (data && data.showMaps === false) {
+        root.innerHTML = "";
+        root.style.display = "none";
+        return;
+      }
 
-  root.style.display = "flex";
-  root.innerHTML = "";
+      root.style.display = "flex";
+      root.innerHTML = "";
 
-  var defaultMaps = getDefaultData().maps;
-  var maps = data.maps || defaultMaps;
+      var defaultMaps = getDefaultData().maps;
+      var maps = data.maps || defaultMaps;
 
-  for (var i = 0; i < 3; i++) {
-    var map = maps[i] || defaultMaps[i];
-    root.appendChild(createMapCard(map, data));
-  }
-}
+      for (var i = 0; i < 3; i++) {
+        var map = maps[i] || defaultMaps[i];
+        root.appendChild(createMapCard(map, data));
+      }
+    }
 
     function createPlayerCard(player) {
       var card = document.createElement("div");
@@ -426,6 +425,10 @@
       var defaults = getDefaultData();
 
       data = data || defaults;
+
+      if (data.showMaps === undefined) {
+        data.showMaps = true;
+      }
 
       if (!data.leftTeam) {
         data.leftTeam = defaults.leftTeam;
