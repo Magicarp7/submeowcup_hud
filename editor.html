@@ -29,6 +29,18 @@
       width: fit-content;
     }
 
+.logo-preview {
+  width: 42px;
+  height: 42px;
+  margin-top: 8px;
+  border-radius: 7px;
+  background: #0c131a;
+  border: 1px solid #34495e;
+  object-fit: contain;
+  display: block;
+  visibility: hidden;
+}
+
     .top {
       display: flex;
       gap: 18px;
@@ -56,13 +68,48 @@
       color: white;
       font-size: 15px;
     }
+select {
+  width: 220px;
+  padding: 9px;
+  border: 1px solid #34495e;
+  border-radius: 6px;
+  background: #172331;
+  color: white;
+  font-size: 15px;
+}
 
+.map-settings {
+  width: fit-content;
+  margin-bottom: 22px;
+  padding: 20px;
+  background: #14202c;
+  border: 1px solid #2b3b4b;
+  border-radius: 10px;
+}
+
+
+.map-settings h2 {
+  margin-top: 0;
+}
+
+.map-row {
+  display: grid;
+  grid-template-columns: 220px 220px 220px;
+  column-gap: 28px;
+  row-gap: 12px;
+  margin-bottom: 14px;
+}
+.map-row input,
+.map-row select {
+  width: 220px;
+  box-sizing: border-box;
+}
     .teams {
       display: flex;
       gap: 28px;
       align-items: flex-start;
     }
-
+ 
     .team {
       width: 650px;
       padding: 16px;
@@ -172,6 +219,86 @@
       <input id="rightTeamName">
     </div>
   </div>
+<div class="map-settings">
+  <h2>Карты и пики</h2>
+
+  <div class="top">
+    <div class="field">
+      <label>Логотип левой команды</label>
+     <select id="leftLogo"></select>
+<img id="leftLogoPreview" class="logo-preview">
+    </div>
+
+    <div class="field">
+      <label>Логотип правой команды</label>
+      <select id="rightLogo"></select>
+<img id="rightLogoPreview" class="logo-preview">
+    </div>
+  </div>
+
+  <div class="map-row">
+    <div class="field">
+      <label>Блок</label>
+      <input id="map_0_label" value="CURRENT">
+    </div>
+
+    <div class="field">
+      <label>Карта</label>
+      <select id="map_0_name"></select>
+    </div>
+
+    <div class="field">
+      <label>Кто пикнул</label>
+      <select id="map_0_picker">
+        <option value="none">Без логотипа</option>
+        <option value="left">Левая команда</option>
+        <option value="right">Правая команда</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="map-row">
+    <div class="field">
+      <label>Блок</label>
+      <input id="map_1_label" value="NEXT">
+    </div>
+
+    <div class="field">
+      <label>Карта</label>
+      <select id="map_1_name"></select>
+    </div>
+
+    <div class="field">
+      <label>Кто пикнул</label>
+      <select id="map_1_picker">
+        <option value="none">Без логотипа</option>
+        <option value="left">Левая команда</option>
+        <option value="right">Правая команда</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="map-row">
+    <div class="field">
+      <label>Блок</label>
+      <input id="map_2_label" value="DECIDER">
+    </div>
+
+    <div class="field">
+      <label>Карта</label>
+      <select id="map_2_name"></select>
+    </div>
+
+    <div class="field">
+      <label>Кто пикнул</label>
+      <select id="map_2_picker">
+        <option value="none">Без логотипа</option>
+        <option value="left">Левая команда</option>
+        <option value="right">Правая команда</option>
+      </select>
+    </div>
+  </div>
+</div>
 
 <button class="swap-button" onclick="swapSides()">Поменять стороны местами</button>
   <div class="teams">
@@ -207,23 +334,135 @@
 
     var currentData = null;
     var agents = [];
+var logos = [];
+
+async function loadLogos() {
+  try {
+    var response = await fetch("logos.json?t=" + Date.now());
+    logos = await response.json();
+  } catch (error) {
+    logos = [];
+  }
+}
+
+function fillLogoSelect(id, selectedValue) {
+  var select = get(id);
+
+  if (!select) {
+    return;
+  }
+
+  select.innerHTML = "";
+
+  var empty = document.createElement("option");
+  empty.value = "";
+  empty.textContent = "Без логотипа";
+  select.appendChild(empty);
+
+  for (var i = 0; i < logos.length; i++) {
+    var option = document.createElement("option");
+    option.value = logos[i].url;
+    option.textContent = logos[i].name;
+    select.appendChild(option);
+  }
+
+  if (selectedValue) {
+    select.value = selectedValue;
+  }
+}
+
+function updateLogoPreview(selectId, previewId) {
+  var value = get(selectId).value;
+  var img = get(previewId);
+
+  if (value) {
+    img.src = value;
+    img.style.visibility = "visible";
+  } else {
+    img.removeAttribute("src");
+    img.style.visibility = "hidden";
+  }
+}
+
+function fillLogoSelects() {
+  var leftCurrent = currentData?.leftTeam?.logo || "";
+  var rightCurrent = currentData?.rightTeam?.logo || "";
+
+  fillLogoSelect("leftLogo", leftCurrent);
+  fillLogoSelect("rightLogo", rightCurrent);
+
+  updateLogoPreview("leftLogo", "leftLogoPreview");
+  updateLogoPreview("rightLogo", "rightLogoPreview");
+}
+var mapsList = [
+  "Abyss",
+  "Ascent",
+  "Bind",
+  "Breeze",
+  "Fracture",
+  "Haven",
+  "Icebox",
+  "Lotus",
+  "Pearl",
+  "Split",
+  "Sunset",
+  "Summit"
+];
+
+function fillMapSelects() {
+  for (var i = 0; i < 3; i++) {
+    var select = get("map_" + i + "_name");
+
+    if (!select) {
+      continue;
+    }
+
+    select.innerHTML = "";
+
+    for (var m = 0; m < mapsList.length; m++) {
+      var option = document.createElement("option");
+      option.value = mapsList[m];
+      option.textContent = mapsList[m];
+      select.appendChild(option);
+    }
+  }
+}
 
     function get(id) {
       return document.getElementById(id);
     }
 
     function defaultData() {
-      return {
-        leftTeam: {
-          name: "LEFT",
-          players: []
-        },
-        rightTeam: {
-          name: "RIGHT",
-          players: []
-        }
-      };
-    }
+  return {
+    leftTeam: {
+      name: "LEFT",
+      logo: "",
+      players: []
+    },
+    rightTeam: {
+      name: "RIGHT",
+      logo: "",
+      players: []
+    },
+    maps: [
+      {
+        label: "CURRENT",
+        name: "Haven",
+        picker: "left"
+      },
+      {
+        label: "NEXT",
+        name: "Ascent",
+        picker: "right"
+      },
+      {
+        label: "DECIDER",
+        name: "Sunset",
+        picker: "none"
+      }
+    ]
+  };
+}
 
     function findAgent(name) {
       var value = String(name || "").trim().toLowerCase();
@@ -383,6 +622,19 @@
 
       setValue("leftTeamName", currentData.leftTeam.name, "LEFT");
       setValue("rightTeamName", currentData.rightTeam.name, "RIGHT");
+fillLogoSelects();
+
+if (!currentData.maps) {
+  currentData.maps = defaultData().maps;
+}
+
+for (var i = 0; i < 3; i++) {
+  var map = currentData.maps[i] || defaultData().maps[i];
+
+  setValue("map_" + i + "_label", map.label, defaultData().maps[i].label);
+  get("map_" + i + "_name").value = map.name || defaultData().maps[i].name;
+  get("map_" + i + "_picker").value = map.picker || "none";
+}
 
       createRows("leftRows", "left");
       createRows("rightRows", "right");
@@ -399,15 +651,34 @@
       }
 
       var data = {
-        leftTeam: {
-          name: get("leftTeamName").value || "LEFT",
-          players: readTeam("left")
-        },
-        rightTeam: {
-          name: get("rightTeamName").value || "RIGHT",
-          players: readTeam("right")
-        }
-      };
+  leftTeam: {
+    name: get("leftTeamName").value || "LEFT",
+    logo: get("leftLogo").value || "",
+    players: readTeam("left")
+  },
+  rightTeam: {
+    name: get("rightTeamName").value || "RIGHT",
+    logo: get("rightLogo").value || "",
+    players: readTeam("right")
+  },
+  maps: [
+    {
+      label: get("map_0_label").value || "CURRENT",
+      name: get("map_0_name").value || "Haven",
+      picker: get("map_0_picker").value || "none"
+    },
+    {
+      label: get("map_1_label").value || "NEXT",
+      name: get("map_1_name").value || "Ascent",
+      picker: get("map_1_picker").value || "none"
+    },
+    {
+      label: get("map_2_label").value || "DECIDER",
+      name: get("map_2_name").value || "Sunset",
+      picker: get("map_2_picker").value || "none"
+    }
+  ]
+};
 
       try {
         await hudRef.set(data);
@@ -487,12 +758,23 @@ async function swapSides() {
     });
 
     async function main() {
-      await loadAgents();
+  await loadAgents();
+  await loadLogos();
 
-      hudRef.on("value", function (snapshot) {
-        renderEditor(snapshot.val() || defaultData());
-      });
-    }
+  fillMapSelects();
+
+  get("leftLogo").addEventListener("change", function () {
+    updateLogoPreview("leftLogo", "leftLogoPreview");
+  });
+
+  get("rightLogo").addEventListener("change", function () {
+    updateLogoPreview("rightLogo", "rightLogoPreview");
+  });
+
+  hudRef.on("value", function (snapshot) {
+    renderEditor(snapshot.val() || defaultData());
+  });
+}
 
     main();
   </script>
