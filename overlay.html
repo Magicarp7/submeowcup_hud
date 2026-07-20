@@ -16,6 +16,72 @@
       color: white;
     }
 
+    .map-strip {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 32px;
+  display: flex;
+  z-index: 9999;
+  filter: drop-shadow(0 3px 7px rgba(0, 0, 0, 0.75));
+}
+
+    .map-card {
+  position: relative;
+  width: 195px;
+  height: 32px;
+  margin-right: 2px;
+  background: rgba(9, 14, 20, 0.88);
+  border-right: 1px solid rgba(255, 255, 255, 0.16);
+  clip-path: polygon(0 0, 94% 0, 100% 100%, 0 100%);
+  display: flex;
+  align-items: center;
+  padding-left: 8px;
+  padding-right: 28px;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+    .map-label {
+      font-size: 13px;
+      font-weight: 900;
+      color: rgba(255, 255, 255, 0.78);
+      margin-right: 5px;
+      white-space: nowrap;
+    }
+
+    .map-name {
+      font-size: 15px;
+      font-weight: 900;
+      color: white;
+      letter-spacing: 0.4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .map-logo {
+      position: absolute;
+      right: 10px;
+      width: 24px;
+      height: 24px;
+      object-fit: contain;
+    }
+
+    .map-logo-fallback {
+      position: absolute;
+      right: 10px;
+      width: 24px;
+      height: 24px;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.12);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 900;
+    }
+
     .hud-column {
       position: absolute;
       bottom: 10px;
@@ -155,6 +221,8 @@
 </head>
 
 <body>
+  <div id="mapStrip" class="map-strip"></div>
+
   <div class="hud-column left">
     <div id="leftTitle" class="team-title">LEFT</div>
     <div id="leftSide" class="side"></div>
@@ -211,6 +279,94 @@
       return agentLetters[agent] || String(agent).slice(0, 1).toUpperCase();
     }
 
+    function getDefaultData() {
+      return {
+        leftTeam: {
+          name: "LEFT",
+          logo: "",
+          players: []
+        },
+        rightTeam: {
+          name: "RIGHT",
+          logo: "",
+          players: []
+        },
+        maps: [
+          {
+            label: "CURRENT",
+            name: "HAVEN",
+            picker: "left"
+          },
+          {
+            label: "NEXT",
+            name: "ASCENT",
+            picker: "right"
+          },
+          {
+            label: "DECIDER",
+            name: "SUNSET",
+            picker: "none"
+          }
+        ]
+      };
+    }
+
+    function getTeamByPicker(data, picker) {
+      if (picker === "left") {
+        return data.leftTeam;
+      }
+
+      if (picker === "right") {
+        return data.rightTeam;
+      }
+
+      return null;
+    }
+
+    function createMapCard(map, data) {
+      var card = document.createElement("div");
+      card.className = "map-card";
+
+      var label = document.createElement("div");
+      label.className = "map-label";
+      label.textContent = String(map.label || "").toUpperCase() + ":";
+
+      var name = document.createElement("div");
+      name.className = "map-name";
+      name.textContent = String(map.name || "").toUpperCase();
+
+      card.append(label, name);
+
+      var team = getTeamByPicker(data, map.picker);
+
+      if (team && team.logo) {
+        var img = document.createElement("img");
+        img.className = "map-logo";
+        img.src = team.logo;
+        card.appendChild(img);
+      } else if (team && team.name) {
+        var fallback = document.createElement("div");
+        fallback.className = "map-logo-fallback";
+        fallback.textContent = String(team.name).slice(0, 2).toUpperCase();
+        card.appendChild(fallback);
+      }
+
+      return card;
+    }
+
+    function renderMaps(data) {
+      var root = document.getElementById("mapStrip");
+      root.innerHTML = "";
+
+      var defaultMaps = getDefaultData().maps;
+      var maps = data.maps || defaultMaps;
+
+      for (var i = 0; i < 3; i++) {
+        var map = maps[i] || defaultMaps[i];
+        root.appendChild(createMapCard(map, data));
+      }
+    }
+
     function createPlayerCard(player) {
       var card = document.createElement("div");
       card.className = "player-card";
@@ -257,30 +413,23 @@
     }
 
     function renderHud(data) {
-      data = data || {
-        leftTeam: {
-          name: "LEFT",
-          players: []
-        },
-        rightTeam: {
-          name: "RIGHT",
-          players: []
-        }
-      };
+      var defaults = getDefaultData();
+
+      data = data || defaults;
 
       if (!data.leftTeam) {
-        data.leftTeam = {
-          name: "LEFT",
-          players: []
-        };
+        data.leftTeam = defaults.leftTeam;
       }
 
       if (!data.rightTeam) {
-        data.rightTeam = {
-          name: "RIGHT",
-          players: []
-        };
+        data.rightTeam = defaults.rightTeam;
       }
+
+      if (!data.maps) {
+        data.maps = defaults.maps;
+      }
+
+      renderMaps(data);
 
       document.getElementById("leftTitle").textContent = data.leftTeam.name || "LEFT";
       document.getElementById("rightTitle").textContent = data.rightTeam.name || "RIGHT";
