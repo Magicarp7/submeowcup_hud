@@ -17,6 +17,10 @@
       margin-bottom: 18px;
     }
 
+    h2 {
+      margin-top: 0;
+    }
+
     .login-box {
       display: flex;
       gap: 12px;
@@ -28,18 +32,6 @@
       border-radius: 10px;
       width: fit-content;
     }
-
-.logo-preview {
-  width: 42px;
-  height: 42px;
-  margin-top: 8px;
-  border-radius: 7px;
-  background: #0c131a;
-  border: 1px solid #34495e;
-  object-fit: contain;
-  display: block;
-  visibility: hidden;
-}
 
     .top {
       display: flex;
@@ -59,7 +51,8 @@
       opacity: 0.75;
     }
 
-    input {
+    input,
+    select {
       width: 220px;
       padding: 9px;
       border: 1px solid #34495e;
@@ -67,49 +60,44 @@
       background: #172331;
       color: white;
       font-size: 15px;
+      box-sizing: border-box;
     }
-select {
-  width: 220px;
-  padding: 9px;
-  border: 1px solid #34495e;
-  border-radius: 6px;
-  background: #172331;
-  color: white;
-  font-size: 15px;
-}
 
-.map-settings {
-  width: fit-content;
-  margin-bottom: 22px;
-  padding: 20px;
-  background: #14202c;
-  border: 1px solid #2b3b4b;
-  border-radius: 10px;
-}
+    .map-settings {
+      width: fit-content;
+      margin-bottom: 22px;
+      padding: 20px;
+      background: #14202c;
+      border: 1px solid #2b3b4b;
+      border-radius: 10px;
+    }
 
+    .map-row {
+      display: grid;
+      grid-template-columns: 220px 220px 220px;
+      column-gap: 28px;
+      row-gap: 12px;
+      margin-bottom: 14px;
+    }
 
-.map-settings h2 {
-  margin-top: 0;
-}
+    .logo-preview {
+      width: 42px;
+      height: 42px;
+      margin-top: 8px;
+      border-radius: 7px;
+      background: #0c131a;
+      border: 1px solid #34495e;
+      object-fit: contain;
+      display: block;
+      visibility: hidden;
+    }
 
-.map-row {
-  display: grid;
-  grid-template-columns: 220px 220px 220px;
-  column-gap: 28px;
-  row-gap: 12px;
-  margin-bottom: 14px;
-}
-.map-row input,
-.map-row select {
-  width: 220px;
-  box-sizing: border-box;
-}
     .teams {
       display: flex;
       gap: 28px;
       align-items: flex-start;
     }
- 
+
     .team {
       width: 650px;
       padding: 16px;
@@ -118,13 +106,9 @@ select {
       border-radius: 10px;
     }
 
-    .team h2 {
-      margin-top: 0;
-    }
-
     .player-row {
       display: grid;
-      grid-template-columns: 32px 240px 230px 52px;
+      grid-template-columns: 32px 230px 230px 52px;
       gap: 10px;
       align-items: end;
       margin-bottom: 12px;
@@ -157,15 +141,29 @@ select {
       cursor: pointer;
     }
 
-.swap-button {
-  margin-bottom: 18px;
-  background: #ffcf5a;
-  color: #111820;
-}
+    .swap-button {
+      margin-bottom: 18px;
+      background: #ffcf5a;
+      color: #111820;
+    }
 
     .save-button {
       margin-top: 20px;
       font-size: 16px;
+    }
+
+    .toggle-maps-button {
+      margin-bottom: 18px;
+    }
+
+    .toggle-maps-button.enabled {
+      background: #ff6b7a;
+      color: white;
+    }
+
+    .toggle-maps-button.disabled {
+      background: #30f0c8;
+      color: #071015;
     }
 
     .hint {
@@ -219,88 +217,94 @@ select {
       <input id="rightTeamName">
     </div>
   </div>
-<div class="map-settings">
-  <h2>Карты и пики</h2>
 
-  <div class="top">
-    <div class="field">
-      <label>Логотип левой команды</label>
-     <select id="leftLogo"></select>
-<img id="leftLogoPreview" class="logo-preview">
+  <div class="map-settings">
+    <h2>Карты и пики</h2>
+
+    <button id="toggleMapsButton" class="toggle-maps-button enabled" onclick="toggleMapsVisibility()">
+      Выключить карты и пики в HUD
+    </button>
+
+    <div class="top">
+      <div class="field">
+        <label>Логотип левой команды</label>
+        <select id="leftLogo"></select>
+        <img id="leftLogoPreview" class="logo-preview">
+      </div>
+
+      <div class="field">
+        <label>Логотип правой команды</label>
+        <select id="rightLogo"></select>
+        <img id="rightLogoPreview" class="logo-preview">
+      </div>
     </div>
 
-    <div class="field">
-      <label>Логотип правой команды</label>
-      <select id="rightLogo"></select>
-<img id="rightLogoPreview" class="logo-preview">
+    <div class="map-row">
+      <div class="field">
+        <label>Блок</label>
+        <input id="map_0_label" value="CURRENT">
+      </div>
+
+      <div class="field">
+        <label>Карта</label>
+        <select id="map_0_name"></select>
+      </div>
+
+      <div class="field">
+        <label>Кто пикнул</label>
+        <select id="map_0_picker">
+          <option value="none">Без логотипа</option>
+          <option value="left">Левая команда</option>
+          <option value="right">Правая команда</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="map-row">
+      <div class="field">
+        <label>Блок</label>
+        <input id="map_1_label" value="NEXT">
+      </div>
+
+      <div class="field">
+        <label>Карта</label>
+        <select id="map_1_name"></select>
+      </div>
+
+      <div class="field">
+        <label>Кто пикнул</label>
+        <select id="map_1_picker">
+          <option value="none">Без логотипа</option>
+          <option value="left">Левая команда</option>
+          <option value="right">Правая команда</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="map-row">
+      <div class="field">
+        <label>Блок</label>
+        <input id="map_2_label" value="DECIDER">
+      </div>
+
+      <div class="field">
+        <label>Карта</label>
+        <select id="map_2_name"></select>
+      </div>
+
+      <div class="field">
+        <label>Кто пикнул</label>
+        <select id="map_2_picker">
+          <option value="none">Без логотипа</option>
+          <option value="left">Левая команда</option>
+          <option value="right">Правая команда</option>
+        </select>
+      </div>
     </div>
   </div>
 
-  <div class="map-row">
-    <div class="field">
-      <label>Блок</label>
-      <input id="map_0_label" value="CURRENT">
-    </div>
+  <button class="swap-button" onclick="swapSides()">Поменять стороны местами</button>
 
-    <div class="field">
-      <label>Карта</label>
-      <select id="map_0_name"></select>
-    </div>
-
-    <div class="field">
-      <label>Кто пикнул</label>
-      <select id="map_0_picker">
-        <option value="none">Без логотипа</option>
-        <option value="left">Левая команда</option>
-        <option value="right">Правая команда</option>
-      </select>
-    </div>
-  </div>
-
-  <div class="map-row">
-    <div class="field">
-      <label>Блок</label>
-      <input id="map_1_label" value="NEXT">
-    </div>
-
-    <div class="field">
-      <label>Карта</label>
-      <select id="map_1_name"></select>
-    </div>
-
-    <div class="field">
-      <label>Кто пикнул</label>
-      <select id="map_1_picker">
-        <option value="none">Без логотипа</option>
-        <option value="left">Левая команда</option>
-        <option value="right">Правая команда</option>
-      </select>
-    </div>
-  </div>
-
-  <div class="map-row">
-    <div class="field">
-      <label>Блок</label>
-      <input id="map_2_label" value="DECIDER">
-    </div>
-
-    <div class="field">
-      <label>Карта</label>
-      <select id="map_2_name"></select>
-    </div>
-
-    <div class="field">
-      <label>Кто пикнул</label>
-      <select id="map_2_picker">
-        <option value="none">Без логотипа</option>
-        <option value="left">Левая команда</option>
-        <option value="right">Правая команда</option>
-      </select>
-    </div>
-  </div>
-</div>
-
-<button class="swap-button" onclick="swapSides()">Поменять стороны местами</button>
   <div class="teams">
     <div class="team">
       <h2>Левая сторона</h2>
@@ -317,7 +321,7 @@ select {
   <span id="status" class="status"></span>
 
   <div class="hint">
-    В поле агент начни писать имя агента. Например Raze, Omen, Jett. После выбора картинка подставится сама.
+    В поле агент начни писать имя агента, например Raze, Omen, Jett, после выбора картинка подставится сама
   </div>
 
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
@@ -334,135 +338,78 @@ select {
 
     var currentData = null;
     var agents = [];
-var logos = [];
+    var logos = [];
 
-async function loadLogos() {
-  try {
-    var response = await fetch("logos.json?t=" + Date.now());
-    logos = await response.json();
-  } catch (error) {
-    logos = [];
-  }
-}
-
-function fillLogoSelect(id, selectedValue) {
-  var select = get(id);
-
-  if (!select) {
-    return;
-  }
-
-  select.innerHTML = "";
-
-  var empty = document.createElement("option");
-  empty.value = "";
-  empty.textContent = "Без логотипа";
-  select.appendChild(empty);
-
-  for (var i = 0; i < logos.length; i++) {
-    var option = document.createElement("option");
-    option.value = logos[i].url;
-    option.textContent = logos[i].name;
-    select.appendChild(option);
-  }
-
-  if (selectedValue) {
-    select.value = selectedValue;
-  }
-}
-
-function updateLogoPreview(selectId, previewId) {
-  var value = get(selectId).value;
-  var img = get(previewId);
-
-  if (value) {
-    img.src = value;
-    img.style.visibility = "visible";
-  } else {
-    img.removeAttribute("src");
-    img.style.visibility = "hidden";
-  }
-}
-
-function fillLogoSelects() {
-  var leftCurrent = currentData?.leftTeam?.logo || "";
-  var rightCurrent = currentData?.rightTeam?.logo || "";
-
-  fillLogoSelect("leftLogo", leftCurrent);
-  fillLogoSelect("rightLogo", rightCurrent);
-
-  updateLogoPreview("leftLogo", "leftLogoPreview");
-  updateLogoPreview("rightLogo", "rightLogoPreview");
-}
-var mapsList = [
-  "Abyss",
-  "Ascent",
-  "Bind",
-  "Breeze",
-  "Fracture",
-  "Haven",
-  "Icebox",
-  "Lotus",
-  "Pearl",
-  "Split",
-  "Sunset",
-  "Summit"
-];
-
-function fillMapSelects() {
-  for (var i = 0; i < 3; i++) {
-    var select = get("map_" + i + "_name");
-
-    if (!select) {
-      continue;
-    }
-
-    select.innerHTML = "";
-
-    for (var m = 0; m < mapsList.length; m++) {
-      var option = document.createElement("option");
-      option.value = mapsList[m];
-      option.textContent = mapsList[m];
-      select.appendChild(option);
-    }
-  }
-}
+    var mapsList = [
+      "Abyss",
+      "Ascent",
+      "Bind",
+      "Breeze",
+      "Fracture",
+      "Haven",
+      "Icebox",
+      "Lotus",
+      "Pearl",
+      "Split",
+      "Sunset"
+    ];
 
     function get(id) {
       return document.getElementById(id);
     }
 
     function defaultData() {
-  return {
-    leftTeam: {
-      name: "LEFT",
-      logo: "",
-      players: []
-    },
-    rightTeam: {
-      name: "RIGHT",
-      logo: "",
-      players: []
-    },
-    maps: [
-      {
-        label: "CURRENT",
-        name: "Haven",
-        picker: "left"
-      },
-      {
-        label: "NEXT",
-        name: "Ascent",
-        picker: "right"
-      },
-      {
-        label: "DECIDER",
-        name: "Sunset",
-        picker: "none"
+      return {
+        showMaps: true,
+        leftTeam: {
+          name: "LEFT",
+          logo: "",
+          players: []
+        },
+        rightTeam: {
+          name: "RIGHT",
+          logo: "",
+          players: []
+        },
+        maps: [
+          {
+            label: "CURRENT",
+            name: "Haven",
+            picker: "left"
+          },
+          {
+            label: "NEXT",
+            name: "Ascent",
+            picker: "right"
+          },
+          {
+            label: "DECIDER",
+            name: "Sunset",
+            picker: "none"
+          }
+        ]
+      };
+    }
+
+    function setValue(id, value, fallback) {
+      if (!get(id)) {
+        return;
       }
-    ]
-  };
-}
+
+      if (value === undefined || value === null || value === "") {
+        get(id).value = fallback;
+      } else {
+        get(id).value = value;
+      }
+    }
+
+    function getPlayer(teamKey, index) {
+      if (!currentData || !currentData[teamKey] || !currentData[teamKey].players) {
+        return {};
+      }
+
+      return currentData[teamKey].players[index] || {};
+    }
 
     function findAgent(name) {
       var value = String(name || "").trim().toLowerCase();
@@ -480,19 +427,136 @@ function fillMapSelects() {
       return null;
     }
 
-    function getPlayer(teamKey, index) {
-      if (!currentData || !currentData[teamKey] || !currentData[teamKey].players) {
-        return {};
+    async function loadAgents() {
+      try {
+        var response = await fetch("https://valorant-api.com/v1/agents?language=ru-RU&isPlayableCharacter=true");
+        var result = await response.json();
+
+        agents = result.data.map(function (item) {
+          return {
+            name: item.displayName,
+            uuid: item.uuid,
+            icon: item.displayIcon
+          };
+        }).sort(function (a, b) {
+          return a.name.localeCompare(b.name);
+        });
+      } catch (error) {
+        agents = [];
       }
 
-      return currentData[teamKey].players[index] || {};
+      var list = get("agentsList");
+      list.innerHTML = "";
+
+      for (var i = 0; i < agents.length; i++) {
+        var option = document.createElement("option");
+        option.value = agents[i].name;
+        list.appendChild(option);
+      }
     }
 
-    function setValue(id, value, fallback) {
-      if (value === undefined || value === null || value === "") {
-        get(id).value = fallback;
+    async function loadLogos() {
+      try {
+        var response = await fetch("logos.json?t=" + Date.now());
+        logos = await response.json();
+
+        if (!Array.isArray(logos)) {
+          logos = [];
+        }
+      } catch (error) {
+        logos = [];
+      }
+    }
+
+    function fillLogoSelect(id, selectedValue) {
+      var select = get(id);
+
+      if (!select) {
+        return;
+      }
+
+      select.innerHTML = "";
+
+      var empty = document.createElement("option");
+      empty.value = "";
+      empty.textContent = "Без логотипа";
+      select.appendChild(empty);
+
+      for (var i = 0; i < logos.length; i++) {
+        var option = document.createElement("option");
+        option.value = logos[i].url;
+        option.textContent = logos[i].name;
+        select.appendChild(option);
+      }
+
+      if (selectedValue) {
+        var exists = false;
+
+        for (var j = 0; j < select.options.length; j++) {
+          if (select.options[j].value === selectedValue) {
+            exists = true;
+          }
+        }
+
+        if (!exists) {
+          var custom = document.createElement("option");
+          custom.value = selectedValue;
+          custom.textContent = "Текущий логотип";
+          select.appendChild(custom);
+        }
+
+        select.value = selectedValue;
+      }
+    }
+
+    function updateLogoPreview(selectId, previewId) {
+      var value = get(selectId).value;
+      var img = get(previewId);
+
+      if (value) {
+        img.src = value;
+        img.style.visibility = "visible";
       } else {
-        get(id).value = value;
+        img.removeAttribute("src");
+        img.style.visibility = "hidden";
+      }
+    }
+
+    function fillLogoSelects() {
+      var leftCurrent = "";
+      var rightCurrent = "";
+
+      if (currentData && currentData.leftTeam) {
+        leftCurrent = currentData.leftTeam.logo || "";
+      }
+
+      if (currentData && currentData.rightTeam) {
+        rightCurrent = currentData.rightTeam.logo || "";
+      }
+
+      fillLogoSelect("leftLogo", leftCurrent);
+      fillLogoSelect("rightLogo", rightCurrent);
+
+      updateLogoPreview("leftLogo", "leftLogoPreview");
+      updateLogoPreview("rightLogo", "rightLogoPreview");
+    }
+
+    function fillMapSelects() {
+      for (var i = 0; i < 3; i++) {
+        var select = get("map_" + i + "_name");
+
+        if (!select) {
+          continue;
+        }
+
+        select.innerHTML = "";
+
+        for (var m = 0; m < mapsList.length; m++) {
+          var option = document.createElement("option");
+          option.value = mapsList[m];
+          option.textContent = mapsList[m];
+          select.appendChild(option);
+        }
       }
     }
 
@@ -581,60 +645,41 @@ function fillMapSelects() {
       return players;
     }
 
-    async function loadAgents() {
-      try {
-        var response = await fetch("https://valorant-api.com/v1/agents?language=ru-RU&isPlayableCharacter=true");
-        var result = await response.json();
-
-        agents = result.data.map(function (item) {
-          return {
-            name: item.displayName,
-            uuid: item.uuid,
-            icon: item.displayIcon
-          };
-        }).sort(function (a, b) {
-          return a.name.localeCompare(b.name);
-        });
-      } catch (error) {
-        agents = [];
-      }
-
-      var list = get("agentsList");
-      list.innerHTML = "";
-
-      for (var i = 0; i < agents.length; i++) {
-        var option = document.createElement("option");
-        option.value = agents[i].name;
-        list.appendChild(option);
-      }
-    }
-
     function renderEditor(data) {
-      currentData = data || defaultData();
+      var defaults = defaultData();
+
+      currentData = data || defaults;
+
+      if (currentData.showMaps === undefined) {
+        currentData.showMaps = true;
+      }
 
       if (!currentData.leftTeam) {
-        currentData.leftTeam = defaultData().leftTeam;
+        currentData.leftTeam = defaults.leftTeam;
       }
 
       if (!currentData.rightTeam) {
-        currentData.rightTeam = defaultData().rightTeam;
+        currentData.rightTeam = defaults.rightTeam;
+      }
+
+      if (!currentData.maps) {
+        currentData.maps = defaults.maps;
       }
 
       setValue("leftTeamName", currentData.leftTeam.name, "LEFT");
       setValue("rightTeamName", currentData.rightTeam.name, "RIGHT");
-fillLogoSelects();
 
-if (!currentData.maps) {
-  currentData.maps = defaultData().maps;
-}
+      fillLogoSelects();
 
-for (var i = 0; i < 3; i++) {
-  var map = currentData.maps[i] || defaultData().maps[i];
+      for (var i = 0; i < 3; i++) {
+        var map = currentData.maps[i] || defaults.maps[i];
 
-  setValue("map_" + i + "_label", map.label, defaultData().maps[i].label);
-  get("map_" + i + "_name").value = map.name || defaultData().maps[i].name;
-  get("map_" + i + "_picker").value = map.picker || "none";
-}
+        setValue("map_" + i + "_label", map.label, defaults.maps[i].label);
+        get("map_" + i + "_name").value = map.name || defaults.maps[i].name;
+        get("map_" + i + "_picker").value = map.picker || "none";
+      }
+
+      updateMapsToggleButton();
 
       createRows("leftRows", "left");
       createRows("rightRows", "right");
@@ -651,34 +696,38 @@ for (var i = 0; i < 3; i++) {
       }
 
       var data = {
-  leftTeam: {
-    name: get("leftTeamName").value || "LEFT",
-    logo: get("leftLogo").value || "",
-    players: readTeam("left")
-  },
-  rightTeam: {
-    name: get("rightTeamName").value || "RIGHT",
-    logo: get("rightLogo").value || "",
-    players: readTeam("right")
-  },
-  maps: [
-    {
-      label: get("map_0_label").value || "CURRENT",
-      name: get("map_0_name").value || "Haven",
-      picker: get("map_0_picker").value || "none"
-    },
-    {
-      label: get("map_1_label").value || "NEXT",
-      name: get("map_1_name").value || "Ascent",
-      picker: get("map_1_picker").value || "none"
-    },
-    {
-      label: get("map_2_label").value || "DECIDER",
-      name: get("map_2_name").value || "Sunset",
-      picker: get("map_2_picker").value || "none"
-    }
-  ]
-};
+        showMaps: currentData && currentData.showMaps === false ? false : true,
+
+        leftTeam: {
+          name: get("leftTeamName").value || "LEFT",
+          logo: get("leftLogo").value || "",
+          players: readTeam("left")
+        },
+
+        rightTeam: {
+          name: get("rightTeamName").value || "RIGHT",
+          logo: get("rightLogo").value || "",
+          players: readTeam("right")
+        },
+
+        maps: [
+          {
+            label: get("map_0_label").value || "CURRENT",
+            name: get("map_0_name").value || "Haven",
+            picker: get("map_0_picker").value || "none"
+          },
+          {
+            label: get("map_1_label").value || "NEXT",
+            name: get("map_1_name").value || "Ascent",
+            picker: get("map_1_picker").value || "none"
+          },
+          {
+            label: get("map_2_label").value || "DECIDER",
+            name: get("map_2_name").value || "Sunset",
+            picker: get("map_2_picker").value || "none"
+          }
+        ]
+      };
 
       try {
         await hudRef.set(data);
@@ -696,40 +745,98 @@ for (var i = 0; i < 3; i++) {
       }
     }
 
-function swapInputValues(leftId, rightId) {
-  var leftValue = get(leftId).value;
-  var rightValue = get(rightId).value;
+    function mapsAreVisible() {
+      if (!currentData) {
+        return true;
+      }
 
-  get(leftId).value = rightValue;
-  get(rightId).value = leftValue;
-}
+      return currentData.showMaps !== false;
+    }
 
-async function swapSides() {
-  if (!auth.currentUser) {
-    get("status").textContent = "Сначала войди";
-    get("status").className = "status danger";
-    return;
-  }
+    function updateMapsToggleButton() {
+      var button = get("toggleMapsButton");
 
-  swapInputValues("leftTeamName", "rightTeamName");
+      if (!button) {
+        return;
+      }
 
-  for (var i = 0; i < 5; i++) {
-    swapInputValues("left_" + i + "_name", "right_" + i + "_name");
-    swapInputValues("left_" + i + "_agent", "right_" + i + "_agent");
+      if (mapsAreVisible()) {
+        button.textContent = "Выключить карты и пики в HUD";
+        button.className = "toggle-maps-button enabled";
+      } else {
+        button.textContent = "Включить карты и пики в HUD";
+        button.className = "toggle-maps-button disabled";
+      }
+    }
 
-    updatePreview("left", i);
-    updatePreview("right", i);
-  }
+    async function toggleMapsVisibility() {
+      if (!auth.currentUser) {
+        get("status").textContent = "Сначала войди";
+        get("status").className = "status danger";
+        return;
+      }
 
-  await saveData();
+      if (!currentData) {
+        currentData = defaultData();
+      }
 
-  get("status").textContent = "Стороны поменяны";
-  get("status").className = "status";
+      currentData.showMaps = currentData.showMaps === false ? true : false;
 
-  setTimeout(function () {
-    get("status").textContent = "";
-  }, 1500);
-}
+      updateMapsToggleButton();
+
+      await saveData();
+
+      if (currentData.showMaps === false) {
+        get("status").textContent = "Карты и пики выключены";
+      } else {
+        get("status").textContent = "Карты и пики включены";
+      }
+
+      get("status").className = "status";
+
+      setTimeout(function () {
+        get("status").textContent = "";
+      }, 1500);
+    }
+
+    function swapInputValues(leftId, rightId) {
+      var leftValue = get(leftId).value;
+      var rightValue = get(rightId).value;
+
+      get(leftId).value = rightValue;
+      get(rightId).value = leftValue;
+    }
+
+    async function swapSides() {
+      if (!auth.currentUser) {
+        get("status").textContent = "Сначала войди";
+        get("status").className = "status danger";
+        return;
+      }
+
+      swapInputValues("leftTeamName", "rightTeamName");
+      swapInputValues("leftLogo", "rightLogo");
+
+      updateLogoPreview("leftLogo", "leftLogoPreview");
+      updateLogoPreview("rightLogo", "rightLogoPreview");
+
+      for (var i = 0; i < 5; i++) {
+        swapInputValues("left_" + i + "_name", "right_" + i + "_name");
+        swapInputValues("left_" + i + "_agent", "right_" + i + "_agent");
+
+        updatePreview("left", i);
+        updatePreview("right", i);
+      }
+
+      await saveData();
+
+      get("status").textContent = "Стороны поменяны";
+      get("status").className = "status";
+
+      setTimeout(function () {
+        get("status").textContent = "";
+      }, 1500);
+    }
 
     async function login() {
       var email = get("email").value;
@@ -758,23 +865,23 @@ async function swapSides() {
     });
 
     async function main() {
-  await loadAgents();
-  await loadLogos();
+      await loadAgents();
+      await loadLogos();
 
-  fillMapSelects();
+      fillMapSelects();
 
-  get("leftLogo").addEventListener("change", function () {
-    updateLogoPreview("leftLogo", "leftLogoPreview");
-  });
+      get("leftLogo").addEventListener("change", function () {
+        updateLogoPreview("leftLogo", "leftLogoPreview");
+      });
 
-  get("rightLogo").addEventListener("change", function () {
-    updateLogoPreview("rightLogo", "rightLogoPreview");
-  });
+      get("rightLogo").addEventListener("change", function () {
+        updateLogoPreview("rightLogo", "rightLogoPreview");
+      });
 
-  hudRef.on("value", function (snapshot) {
-    renderEditor(snapshot.val() || defaultData());
-  });
-}
+      hudRef.on("value", function (snapshot) {
+        renderEditor(snapshot.val() || defaultData());
+      });
+    }
 
     main();
   </script>
